@@ -1,0 +1,12 @@
+#!/bin/sh
+
+init_system_time
+ifconfig eth1 '192.168.101.102' netmask '255.255.255.0'
+exit
+wait_until_network_ready
+
+/etc/init.d/proxy_system start
+/etc/init.d/telnetd start
+/etc/init.d/process_monitor start
+/etc/init.d/ntpd start
+/etc/init.d/vihomed start

@@ -1,0 +1,44 @@
+#!/bin/sh
+# Copyright (C) 2010-2011 Orvibo
+#
+# ntpd 服务的启动脚本
+#
+# Change Logs:
+# Date          Author      Note
+# 2015-09-11    Sid Lee     创建
+
+EXEC=ntpd
+
+NTPD_FLAGS="\
+    -p 0.cn.pool.ntp.org \
+    -p 1.cn.pool.ntp.org \
+    -p 2.cn.pool.ntp.org \
+    -p 3.cn.pool.ntp.org \
+    -p cn.pool.ntp.org \
+    -p 0.tw.pool.ntp.org \
+    -p 1.tw.pool.ntp.org \
+    -p 2.tw.pool.ntp.org \
+    -p 3.tw.pool.ntp.org \
+    -p tw.pool.ntp.org \
+    -p 0.pool.ntp.org \
+    -p 1.pool.ntp.org \
+    -p 2.pool.ntp.org"
+
+start() {
+    $EXEC $NTPD_FLAGS &
+    echo "$EXEC start"
+}
+
+stop()	{
+    killall $EXEC
+    echo "$EXEC stop"
+}
+
+############################
+cmd=$1
+case $cmd in 
+start) start;;
+stop) stop;;
+restart) stop; start;;
+*) echo "Unknow command $cmd"
+esac

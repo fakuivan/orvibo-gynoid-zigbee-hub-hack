@@ -1,0 +1,17 @@
+#!/bin/sh
+
+source run_process_func.inc
+
+while true; do
+    sleep 60
+
+    if [ -f /tmp/enable_vihomed ]; then
+        vihomed_monitor.sh
+    fi
+
+    run_process_if_it_down   'ntpd'     '/etc/init.d/ntpd start'
+    run_process_if_it_down   'telnetd'  '/etc/init.d/telnetd start'
+    run_process_if_it_down   'proxy_system_daemon'  '/etc/init.d/proxy_system start'
+
+    run_process_if_it_down   'super_monitor'  'super_monitor &'
+done

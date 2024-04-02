@@ -1,0 +1,9 @@
+if [ -e /usr/local/button/do_upload_file ]; then
+    sh /usr/local/button/do_upload_file
+    exit 0
+fi
+
+flash_led 4 0.08 0.08
+
+save-debug
+write_log button INFO "upload debug files"

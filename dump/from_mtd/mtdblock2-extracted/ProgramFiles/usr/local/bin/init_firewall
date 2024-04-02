@@ -1,0 +1,5 @@
+iptables -A INPUT -p tcp --dport 8088 -j ACCEPT
+iptables -A INPUT -p udp --dport 10000 -j ACCEPT
+iptables -A INPUT -p tcp --dport 23 -j ACCEPT
+iptables -A INPUT -p tcp --dport 8600 -j ACCEPT
+iptables -A INPUT -p udp --dport 1992 -j ACCEPT

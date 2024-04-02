@@ -1,0 +1,6 @@
+killall -9 sysled_fastblink.sh
+
+rm -f /mnt/device_manager.db
+rm -f /mnt/vihome2.db
+rm -f /mnt/language.txt
+rm -f /mnt/zigbee_information

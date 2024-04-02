@@ -1,0 +1,23 @@
+if [ -e /usr/local/button/start_debug_mode ]; then
+    sh /usr/local/button/start_debug_mode
+    exit 0
+fi
+
+flash_led 4 0.08 0.08
+
+TAG_FILE=/tmp/start_debug_mode_exist
+
+_enable_debug () {
+    iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+    iptables -A INPUT -p tcp --dport 23 -j ACCEPT
+    iptables -A INPUT -p tcp --dport 8600 -j ACCEPT
+}
+
+[ -f $TAG_FILE ] && exit
+touch $TAG_FILE
+
+_enable_debug
+write_log button INFO "start debug mode"
+sleep 60
+write_log button INFO "stop debug mode"
+rm $TAG_FILE

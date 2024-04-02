@@ -1,0 +1,5 @@
+{
+  "model":"Hub100",
+  "net_if":"eth1",
+  "testing":false
+}

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+last_time_file=/mnt/last_system_time
+while true; do
+    sleep 10
+    date +'%F %T' > $last_time_file
+done

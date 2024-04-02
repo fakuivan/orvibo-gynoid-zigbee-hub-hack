@@ -1,0 +1,194 @@
+
+
+
+
+
+
+
+
+try 192.168.14.200
+
+Booting...
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@
+@ chip__no chip__id mfr___id dev___id cap___id size_sft dev_size chipSize
+@ 0000000h 0ef4018h 00000efh 0000040h 0000018h 0000000h 0000018h 1000000h
+@ blk_size blk__cnt sec_size sec__cnt pageSize page_cnt chip_clk chipName
+@ 0010000h 0000100h 0001000h 0001000h 0000100h 0000010h 000004eh W25Q128
+@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+---RealTek(RTL8196E)at 2015.09.08-17:00+0800 v1.6a [16bit](380MHz)
+check_image_header  return_addr:05010000 bank_offset:00000000
+no sys signature at 00010000!
+no sys signature at 00020000!
+no rootfs signature at 000E0000!
+no rootfs signature at 000F0000!
+
+---Escape booting by user
+P0phymode=01, embedded phy
+
+---Ethernet init Okay!
+<RealTekhelp
+Unknown command !
+<RealTek>?
+----------------- COMMAND MODE HELP ------------------
+HELP (?)                                    : Print this help message
+DB <Address> <Len>
+DW <Address> <Len>
+EB <Address> <Value1> <Value2>...
+EW <Address> <Value1> <Value2>...
+CMP: CMP <dst><src><length>
+IPCONFIG:<TargetAddress>
+AUTOBURN: 0/1
+LOADADDR: <Load Address>
+J: Jump to <TargetAddress>
+FLR: FLR <dst><src><length>
+FLW <dst_ROM_offset><src_RAM_addr><length_Byte> <SPI cnt#>: Write offset-data to SPI from RAM
+MDIOR:  MDIOR <phyid> <reg>
+MDIOW:  MDIOW <phyid> <reg> <data>
+PHYR: PHYR <PHYID><reg>
+PHYW: PHYW <PHYID><reg><data>
+PORT1: port 1 patch for FT2
+<RealTek>exit
+Unknown command !
+<RealTek>
+Booting...
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@
+@ chip__no chip__id mfr___id dev___id cap___id size_sft dev_size chipSize
+@ 0000000h 0ef4018h 00000efh 0000040h 0000018h 0000000h 0000018h 1000000h
+@ blk_size blk__cnt sec_size sec__cnt pageSize page_cnt chip_clk chipName
+@ 0010000h 0000100h 0001000h 0001000h 0000100h 0000010h 000004eh W25Q128
+@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+---RealTek(RTL8196E)at 2015.09.08-17:00+0800 v1.6a [16bit](380MHz)
+check_image_header  return_addr:05010000 bank_offset:00000000
+no sys signature at 00010000!
+no sys signature at 00020000!
+no rootfs signature at 000E0000!
+no rootfs signature at 000F0000!
+Jump to image start=0x80500000...
+decompressing kernel:
+Uncompressing Linux... done, booting the kernel.
+done decompressing kernel.
+start address: 0x80003480
+CPU revision is: 0000cd01
+Determined physical RAM map:
+ memory: 02000000 @ 00000000 (usable)
+Zone PFN ranges:
+  Normal   0x00000000 -> 0x00002000
+Movable zone start PFN for each node
+early_node_map[1] active PFN ranges
+    0: 0x00000000 -> 0x00002000
+Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 8128
+Kernel command line: console=ttyS0,38400 root=/dev/mtdblock1
+icache: 16kB/16B, dcache: 8kB/16B, scache: 0kB/0B
+NR_IRQS:48
+PID hash table entries: 128 (order: 7, 512 bytes)
+console handover: boot [early0] -> real [ttyS0]
+Dentry cache hash table entries: 4096 (order: 2, 16384 bytes)
+Inode-cache hash table entries: 2048 (order: 1, 8192 bytes)
+Memory: 25316k/32768k available (2617k kernel code, 7452k reserved, 463k data, 108k init, 0k highmem)
+Calibrating delay loop... 379.28 BogoMIPS (lpj=1896448)
+Mount-cache hash table entries: 512
+net_namespace: 524 bytes
+NET: Registered protocol family 16
+bio: create slab <bio-0> at 0
+NET: Registered protocol family 2
+IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
+TCP established hash table entries: 1024 (order: 1, 8192 bytes)
+TCP bind hash table entries: 1024 (order: 0, 4096 bytes)
+TCP: Hash tables configured (established 1024 bind 1024)
+TCP reno registered
+NET: Registered protocol family 1
+squashfs: version 4.0 (2009/01/31) Phillip Lougher
+JFFS2 version 2.2. (NAND) © 2001-2006 Red Hat, Inc.
+msgmni has been set to 49
+io scheduler noop registered
+io scheduler cfq registered (default)
+MiniHub GPIO Driver v2.2.2
+Build time: Apr  2 2018 10:26:59
+Configure gpio
+Serial: 8250/16550 driver, 2 ports, IRQ sharing disabled
+serial8250: ttyS0 at MMIO 0x18002000 (irq = 8) is a 16550A
+serial8250: ttyS1 at MMIO 0x18002100 (irq = 29) is a 16550A
+PPP generic driver version 2.4.2
+MPPE/MPPC encryption/compression module registered
+NET: Registered protocol family 24
+Realtek WLAN driver - version 1.6 (2013-02-21)(SVN:Unversioned directory)
+98 - 40MHz Clock Source
+i=0  Cannot LinkUP
+98 - 40MHz Clock Source
+i=0  Cannot LinkUP
+init_one fail!!! rc=-19
+98 - 40MHz Clock Source
+i=0  Cannot LinkUP
+98 - 40MHz Clock Source
+i=0  Cannot LinkUP
+init_one fail!!! rc=-19
+
+
+
+Probing RTL8186 10/100 NIC-kenel stack size order[3]...
+chip name: 8196C, chip revid: 0
+NOT YET
+eth0 added. vid=9 Member port 0x1...
+eth1 added. vid=8 Member port 0x10...
+eth2 added. vid=9 Member port 0x2...
+eth3 added. vid=9 Member port 0x4...
+eth4 added. vid=9 Member port 0x8...
+[peth0] added, mapping to [eth1]...
+SPI INIT
+ ------------------------- Force into Single IO Mode ------------------------
+|No chipID  Sft chipSize blkSize secSize pageSize sdCk opCk      chipName    |
+| 0 ef4018h  0h 1000000h  10000h   1000h     100h   40    0           UNKNOWN|
+ ----------------------------------------------------------------------------
+SPI flash(UNKNOWN) was found at CS0, size 0x1000000
+Creating 3 MTD partitions on "flash_bank_1":
+0x000000000000-0x000000130000 : "boot+cfg+linux"
+0x000000130000-0x0000002b0000 : "root fs"
+0x0000002b0000-0x000000d00000 : "jffs2 partition"
+nf_conntrack version 0.5.0 (512 buckets, 2048 max)
+ip_tables: (C) 2000-2006 Netfilter Core Team
+TCP cubic registered
+NET: Registered protocol family 17
+Netlink[Kernel] create socket for igmp ok.
+Realtek FastPath:v1.03
+VFS: Mounted root (squashfs filesystem) readonly on device 31:1.
+Freeing unused kernel memory: 108k freed
+init started: BusyBox v1.22.1 (2018-03-15 17:02:52 CST)
+******************
+sysconf init gw all
+***************
+Init Start...
+Init bridge interface...
+Init WAN Interface...
+sh: reload: not found
+sh: timelycheck: not found
+SysVersion: 3.4.1.1
+Start Button Daemon v1.5.24, BT: Apr  2 2018 10:27:14
+MiniHub login: Mon Nov 26 16:08:28 CST 2018
+wait for ip address, 1
+wait for ip address, 2
+wait for ip address, 3
+wait for ip address, 4
+wait for ip address, 5
+wait for ip address, 6
+wait for ip address, 7
+wait for ip address, 8
+wait for ip address, 9
+allocate_local_ip_manual
+try 192.168.0.200
+try 192.168.1.200
+try 192.168.2.200
+try 192.168.3.200
+try 192.168.4.200
+
+Login timed out after 60 seconds
+MiniHub login: try 192.168.5.200
+try 192.168.6.200
+

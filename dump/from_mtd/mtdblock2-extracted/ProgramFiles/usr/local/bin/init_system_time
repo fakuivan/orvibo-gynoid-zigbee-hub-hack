@@ -1,0 +1,11 @@
+#!/bin/sh
+
+last_time_file=/mnt/last_system_time
+last_time='2015-11-24'
+if [ -f $last_time_file ]; then
+    last_time=`cat $last_time_file`
+fi
+
+date -s "$last_time"
+
+record_last_time &
