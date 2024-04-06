@@ -1,0 +1,94 @@
+#!/bin/ash
+# shellcheck shell=dash
+set -euo pipefail
+MOD_INSTALLING=/mnt/mod_installing
+MOD_REMOVING=/mnt/mod_removing
+MOD_DONE=/mnt/mod_done
+
+err () { "$@" 1>&2; }
+echoerr () { err echo "$@"; }
+
+check_platform () {
+    if [ "3.4.1.1" != "$(cat /version)" ]; then
+        echoerr Hack not tested to work on this version
+        exit 1
+    fi
+}
+
+check_not_in_progress () {
+    if [ -e "$MOD_INSTALLING" ]; then
+        echoerr "Mod install is in in progress or was interrupted at some point"
+        exit 1
+    fi
+    if [ -e "$MOD_REMOVING" ]; then
+        echoerr "Mod removal is in progress or was interrupted at some point"
+        exit 1
+    fi
+}
+
+mod_install () {
+    touch "$MOD_INSTALLING"
+    local init_path=ProgramFiles/etc/init.d
+
+    cp -r /tmp/hack/ /mnt/hack
+
+    mkdir /mnt/hack/unused/
+    (
+        cd /mnt/ &&
+        mv device_manager.db \
+        kvdata.db \
+        log.db \
+        logs \
+        vihome2.db \
+        zigbee_information \
+        hack/unused/
+    )
+    mkdir -p /mnt/hack/unused/"$init_path"/
+    cp /mnt/"$init_path"/rc.local /mnt/hack/unused/"$init_path"/ &&
+        ln -sf ../../../hack/init/main.sh /mnt/"$init_path"/rc.local
+    touch "$MOD_DONE" && rm "$MOD_INSTALLING"
+}
+
+mod_remove () {
+    touch "$MOD_REMOVING"
+    local init_path=ProgramFiles/etc/init.d
+
+    cp /mnt/hack/unused/"$init_path"/rc.local /mnt/"$init_path"/rc.local
+    (
+        cd /mnt/hack/unused/ &&
+        mv device_manager.db \
+        kvdata.db \
+        log.db \
+        logs \
+        vihome2.db \
+        zigbee_information \
+        ../../
+    )
+    rm -rf /mnt/hack/
+
+    rm "$MOD_DONE" && rm "$MOD_REMOVING"
+}
+
+check_platform
+check_not_in_progress
+
+case "$1" in
+    install)
+        if [ -e "$MOD_DONE" ]; then
+            echoerr "Mod already installed"
+            exit 0
+        fi
+        mod_install
+    ;;
+    remove)
+        if ! [ -e "$MOD_DONE" ]; then
+            echoerr "Mod not installed"
+            exit 0
+        fi
+        mod_remove
+    ;;
+    *)
+        echoerr "Not a command: $1"
+        exit 1
+    ;;
+esac

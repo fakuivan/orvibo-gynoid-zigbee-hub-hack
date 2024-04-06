@@ -1,0 +1,83 @@
+from shlex import quote as shq
+from hashlib import md5
+from typing import Literal
+from collections.abc import Iterable, Iterator
+from telnetlib import Telnet
+from random import random
+
+
+def quote_args(*args) -> str:
+    return " ".join(shq(str(arg)) for arg in args)
+
+
+def command_sentinel() -> tuple[str, str]:
+    """
+    Provides a less fragile way to delimit command output,
+    based on random and transformed sentinel values that are unlikely to
+    naturally appear on the output
+    """
+    sentinel_pre = str(random())
+    sentinel = md5(sentinel_pre.encode("ascii")).hexdigest() + "  -"
+    return f"(printf %s '{sentinel_pre}' | md5sum)\r\n", sentinel
+
+
+def wait_for_command(
+    tn: Telnet,
+    *args: str,
+) -> tuple[int, bytes]:
+    s_command, sentinel = command_sentinel()
+    command = f"{quote_args(*args)}; \\\nprintf '\\n%03i' $?; {s_command}".encode(
+        "ascii"
+    )
+    tn.write(command)
+    tn.read_until(s_command.encode("ascii"))
+    result = tn.read_until(sentinel.encode("ascii"))[: -len(sentinel)]
+    return int(result[-3:]), result[:-5]
+
+
+def printf_encode(blob: bytes) -> str:
+    return repr(blob)[2:-1].replace("\\'", "'").replace("%", "%%").replace(" ", "\\x20")
+
+
+def chunked(blob: bytes, chunk_size: int) -> Iterator[bytes]:
+    for i in range(0, len(blob), chunk_size):
+        yield blob[i : i + chunk_size]
+
+
+def script(script) -> tuple[Literal["ash"], Literal["-c"], str]:
+    return ("ash", "-c", script)
+
+
+def pipe_binary(tn: Telnet, blob: Iterable[bytes], *command: str) -> tuple[int, bytes]:
+    """
+    Pipes binary
+    """
+    s_command, sentinel = command_sentinel()
+    read_command = (
+        'while read -sr chunk; do printf -- "$chunk"; done | \r\n'
+        f"{quote_args(*command)}; \\\r\n"
+        f"printf '\\n%03i' $?; {s_command}"
+    ).encode(encoding="ascii")
+    tn.write(read_command)
+    tn.read_until(s_command.encode("ascii"))
+
+    for chunk in blob:
+        encoded = printf_encode(chunk).encode("ascii") + b"\n"
+        tn.write(encoded)
+    tn.write(b"\x04")
+
+    result = tn.read_until(sentinel.encode("ascii"))[: -len(sentinel)]
+    return int(result[-3:]), result[:-5]
+
+
+class RemoteCommandError(RuntimeError):
+    pass
+
+
+def assert_command(result: tuple[int, bytes]) -> bytes:
+    code, message = result
+    if code == 0:
+        return message
+    raise RemoteCommandError(
+        f"Failed to execute command, got code {code} with message:\n" f"{message}"
+    )
