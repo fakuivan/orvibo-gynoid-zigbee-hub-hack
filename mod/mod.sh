@@ -45,6 +45,7 @@ mod_install () {
         zigbee_information \
         hack/unused/
     )
+    touch /mnt/logs
 
     echo Setting executable permissions
     chmod +x /mnt/hack/init/*
@@ -67,12 +68,13 @@ mod_remove () {
     cp /mnt/hack/unused/"$init_path"/rc.local /mnt/"$init_path"/rc.local
 
     echo Restoring vihome app data and removing hack files
+    rm /mnt/actually_mnt/logs
     (
         cd /mnt/hack/unused/ &&
         mv device_manager.db \
         kvdata.db \
         log.db \
-        logs \
+        logs/ \
         vihome2.db \
         zigbee_information \
         ../../
