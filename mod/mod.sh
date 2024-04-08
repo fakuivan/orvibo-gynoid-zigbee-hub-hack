@@ -77,9 +77,8 @@ mod_remove () {
         logs/ \
         vihome2.db \
         zigbee_information \
-        ../../
-    )
-    rm -rf /mnt/hack/
+        ../../../actually_mnt/
+    ) && rm -rf /mnt/actually_mnt/hack/
 
     echo "Uninstall done"
 }
