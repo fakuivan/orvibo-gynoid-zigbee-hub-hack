@@ -46,6 +46,10 @@ mod_install () {
         hack/unused/
     )
 
+    echo Setting executable permissions
+    chmod +x /mnt/hack/init/*
+    chmod +x /mnt/hack/serialgateway
+
     echo Modifying init sequence
     mkdir -p /mnt/hack/unused/"$init_path"/
     cp /mnt/"$init_path"/rc.local /mnt/hack/unused/"$init_path"/ &&
