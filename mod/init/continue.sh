@@ -1,4 +1,4 @@
 #!/bin/sh
 
-"$HACK_DIR"/serialgateway &
-"$HACK_DIR"/init/zigbee_mcu.sh
+/mnt/hack/serialgateway &
+/mnt/hack/init/zigbee_mcu.sh
