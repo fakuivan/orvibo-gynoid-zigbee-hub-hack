@@ -30,8 +30,10 @@ mod_install () {
     touch "$MOD_INSTALLING"
     local init_path=ProgramFiles/etc/init.d
 
+    echo Copying hack to persistent storage
     cp -r /tmp/hack/ /mnt/hack
 
+    echo Moving unused vihome app data
     mkdir /mnt/hack/unused/
     (
         cd /mnt/ &&
@@ -43,9 +45,13 @@ mod_install () {
         zigbee_information \
         hack/unused/
     )
+
+    echo Modifying init sequence
     mkdir -p /mnt/hack/unused/"$init_path"/
     cp /mnt/"$init_path"/rc.local /mnt/hack/unused/"$init_path"/ &&
         ln -sf ../../../hack/init/main.sh /mnt/"$init_path"/rc.local
+
+    echo Install done
     touch "$MOD_DONE" && rm "$MOD_INSTALLING"
 }
 
@@ -53,7 +59,10 @@ mod_remove () {
     touch "$MOD_REMOVING"
     local init_path=ProgramFiles/etc/init.d
 
+    echo Restoring init script
     cp /mnt/hack/unused/"$init_path"/rc.local /mnt/"$init_path"/rc.local
+
+    echo Restoring vihome app data and removing hack files
     (
         cd /mnt/hack/unused/ &&
         mv device_manager.db \
@@ -66,6 +75,7 @@ mod_remove () {
     )
     rm -rf /mnt/hack/
 
+    echo Uninstall done
     rm "$MOD_DONE" && rm "$MOD_REMOVING"
 }
 
