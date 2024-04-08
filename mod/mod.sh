@@ -1,9 +1,9 @@
 #!/bin/ash
 # shellcheck shell=dash
 set -euo pipefail
-MOD_INSTALLING=/mnt/mod_installing
-MOD_REMOVING=/mnt/mod_removing
-MOD_DONE=/mnt/mod_done
+MOD_INSTALLING=/mnt/hack/installing
+MOD_REMOVING=/mnt/hack/removing
+MOD_DONE=/mnt/hack/done
 
 err () { "$@" 1>&2; }
 echoerr () { err echo "$@"; }
@@ -27,11 +27,11 @@ check_not_in_progress () {
 }
 
 mod_install () {
-    touch "$MOD_INSTALLING"
     local init_path=ProgramFiles/etc/init.d
 
     echo Copying hack to persistent storage
     cp -r /tmp/hack/ /mnt/hack
+    touch "$MOD_INSTALLING"
 
     echo Moving unused vihome app data
     mkdir /mnt/hack/unused/
@@ -76,7 +76,6 @@ mod_remove () {
     rm -rf /mnt/hack/
 
     echo Uninstall done
-    rm "$MOD_DONE" && rm "$MOD_REMOVING"
 }
 
 check_platform
