@@ -22,16 +22,15 @@ def command_sentinel() -> tuple[str, str]:
 
 
 def wait_for_command(
-    tn: Telnet,
-    *args: str,
+    tn: Telnet, *args: str, timeout: float | None = None
 ) -> tuple[int, bytes]:
     s_command, sentinel = command_sentinel()
     command = f"{quote_args(*args)}; \\\nprintf '\\n%03i' $?; {s_command}".encode(
         "ascii"
     )
     tn.write(command)
-    tn.read_until(s_command.encode("ascii"))
-    result = tn.read_until(sentinel.encode("ascii"))[: -len(sentinel)]
+    tn.read_until(s_command.encode("ascii"), timeout=timeout)
+    result = tn.read_until(sentinel.encode("ascii"), timeout=timeout)[: -len(sentinel)]
     return int(result[-3:]), result[:-5]
 
 
@@ -48,7 +47,9 @@ def script(script) -> tuple[Literal["ash"], Literal["-c"], str]:
     return ("ash", "-c", script)
 
 
-def pipe_binary(tn: Telnet, blob: Iterable[bytes], *command: str) -> tuple[int, bytes]:
+def pipe_binary(
+    tn: Telnet, blob: Iterable[bytes], *command: str, timeout: float | None = None
+) -> tuple[int, bytes]:
     """
     Pipes binary
     """
@@ -59,14 +60,14 @@ def pipe_binary(tn: Telnet, blob: Iterable[bytes], *command: str) -> tuple[int, 
         f"printf '\\n%03i' $?; {s_command}"
     ).encode(encoding="ascii")
     tn.write(read_command)
-    tn.read_until(s_command.encode("ascii"))
+    tn.read_until(s_command.encode("ascii"), timeout=timeout)
 
     for chunk in blob:
         encoded = printf_encode(chunk).encode("ascii") + b"\n"
         tn.write(encoded)
     tn.write(b"\x04")
 
-    result = tn.read_until(sentinel.encode("ascii"))[: -len(sentinel)]
+    result = tn.read_until(sentinel.encode("ascii"), timeout=timeout)[: -len(sentinel)]
     return int(result[-3:]), result[:-5]
 
 
