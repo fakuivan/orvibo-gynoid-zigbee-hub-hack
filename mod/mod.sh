@@ -51,7 +51,7 @@ mod_install () {
     cp /mnt/"$init_path"/rc.local /mnt/hack/unused/"$init_path"/ &&
         ln -sf ../../../hack/init/main.sh /mnt/"$init_path"/rc.local
 
-    echo Install done
+    echo "Install done"
     touch "$MOD_DONE" && rm "$MOD_INSTALLING"
 }
 
@@ -75,7 +75,7 @@ mod_remove () {
     )
     rm -rf /mnt/hack/
 
-    echo Uninstall done
+    echo "Uninstall done"
 }
 
 check_platform
