@@ -44,8 +44,7 @@ mod_files = tuple(mod_dir / file for file in ("init/", "mod.sh", "serialgateway"
 def stop_boot_sequence(tn: Telnet):
     assert_command(
         wait_for_command(
-            tn,
-            *script("pkill -f rc.local && pkill -f wait_until_network_ready"),
+            tn, raw="pkill rc.local -f && pkill -f wait_until_network_ready"
         )
     )
 

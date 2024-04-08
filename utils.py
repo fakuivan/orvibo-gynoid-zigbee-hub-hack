@@ -1,6 +1,6 @@
 from shlex import quote as shq
 from hashlib import md5
-from typing import Literal
+from typing import Literal, overload
 from collections.abc import Iterable, Iterator
 from telnetlib import Telnet
 from random import random
@@ -21,16 +21,33 @@ def command_sentinel() -> tuple[str, str]:
     return f"(printf %s '{sentinel_pre}' | md5sum)\r\n", sentinel
 
 
+@overload
 def wait_for_command(
     tn: Telnet, *args: str, timeout: float | None = None
+) -> tuple[int, bytes]: ...
+
+
+@overload
+def wait_for_command(
+    tn: Telnet,
+    *,
+    raw: str,
+    timeout: float | None = None,
+) -> tuple[int, bytes]: ...
+
+
+def wait_for_command(
+    tn: Telnet, *args: str, timeout: float | None = None, raw: str | None = None
 ) -> tuple[int, bytes]:
     s_command, sentinel = command_sentinel()
-    command = f"{quote_args(*args)}; \\\nprintf '\\n%03i' $?; {s_command}".encode(
-        "ascii"
-    )
+    command = (
+        f"{quote_args(*args) if raw is None else raw}; \\\n"
+        f"printf '\\n%03i' $?; {s_command}"
+    ).encode("ascii")
     tn.write(command)
     tn.read_until(s_command.encode("ascii"), timeout=timeout)
-    result = tn.read_until(sentinel.encode("ascii"), timeout=timeout)[: -len(sentinel)]
+    response = tn.read_until(sentinel.encode("ascii"), timeout=timeout)
+    result = response[: -len(sentinel)]
     return int(result[-3:]), result[:-5]
 
 
