@@ -81,3 +81,9 @@ def upload_mod(tn: Telnet):
             ),
         )
     )
+
+
+def set_sysled(tn, on: bool = True, blink: bool = False):
+    assert_command(
+        wait_for_command(tn, "sysled", str(0 if not on else 2 if blink else 1))
+    )
