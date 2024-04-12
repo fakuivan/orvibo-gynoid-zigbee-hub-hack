@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-HOME_DIR="$1"
-COPY_PATH="$2"
+COPY_PATH="$1"
+HOME_DIR="$2"
 quote_c () {
     printf "%s" "$1" | jq -RsaM
 }
 
-apt update
-DEBIAN_FRONTEND="noninteractive" apt install git jq make -y
 . /sdk/*-activate
 ln -s mips-linux-uclibc-gcc-4.4.7 /sdk/bin/mips-linux-uclibc-gcc
 
