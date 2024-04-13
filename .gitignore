@@ -1,4 +1,6 @@
 /venv/
+/mod/bin/
+!/mod/bin/*.sh
 
 ## Python gitignore
 
