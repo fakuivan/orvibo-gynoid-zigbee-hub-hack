@@ -1,9 +1,16 @@
 #!/bin/ash
 # shellcheck shell=dash
 set -euo pipefail
-MOD_INSTALLING=/mnt/hack/installing
-MOD_REMOVING=/mnt/hack/removing
-MOD_DONE=/mnt/hack/done
+JFFS2_DIR={{ fs.jffs2_dir | quote_sh }}
+MOD_DIR={{ fs.mod_dir | quote_sh }}
+MOD_INIT_DIR={{ fs.mod_init_dir | quote_sh }}
+MOD_BIN_DIR={{ fs.mod_bin_dir | quote_sh }}
+{% set new_mnt = fs.jffs2_dir / fs.new_mnt %}
+NEW_MNT={{ new_mnt | quote_sh }}
+MOD_INSTALLING="$MOD_DIR"/installing
+MOD_REMOVING="$MOD_DIR"/removing
+MOD_DONE="$MOD_DIR"/done
+SCRIPT_DIR="$(dirname "$0")"
 
 err () { "$@" 1>&2; }
 echoerr () { err echo "$@"; }
@@ -27,34 +34,38 @@ check_not_in_progress () {
 }
 
 mod_install () {
-    local init_path=ProgramFiles/etc/init.d
+    {% set init_path = "ProgramFiles/etc/init.d" %}
+    local init_path={{ init_path | quote_sh }}
 
     echo Copying hack to persistent storage
-    cp -r /tmp/hack/ /mnt/hack
+    cp -r "$SCRIPT_DIR" "$MOD_DIR"
     touch "$MOD_INSTALLING"
 
     echo Moving unused vihome app data
-    mkdir /mnt/hack/unused/
+    mkdir "$MOD_DIR"/unused/
     (
-        cd /mnt/ &&
+        cd "$JFFS2_DIR" &&
         mv device_manager.db \
         kvdata.db \
         log.db \
         logs \
         vihome2.db \
         zigbee_information \
-        hack/unused/
+        "$MOD_DIR_NAME"/unused/
     )
-    touch /mnt/logs
+    touch "$JFFS2_DIR"/logs
 
     echo Setting executable permissions
-    chmod +x /mnt/hack/init/*
-    chmod +x /mnt/hack/serialgateway
+    chmod +x "$MOD_INIT_DIR"/*
+    chmod +x "$MOD_BIN_DIR"/*
 
     echo Modifying init sequence
-    mkdir -p /mnt/hack/unused/"$init_path"/
-    cp /mnt/"$init_path"/rc.local /mnt/hack/unused/"$init_path"/ &&
-        ln -sf ../../../hack/init/main.sh /mnt/"$init_path"/rc.local
+    mkdir -p "$MOD_DIR"/unused/"$init_path"/
+
+    {% set jffs2_init_path = fs.jffs2_dir / init_path %}
+    cp "$JFFS2_DIR"/"$init_path"/rc.local "$MOD_DIR"/unused/"$init_path"/ &&
+        ln -sf {{ fs.mod_init_dir / "main.sh" | relative_to(jffs2_init_path) | quote_sh }} \
+            {{ jffs2_init_path | quote_sh }}/rc.local
 
     echo "Install done"
     touch "$MOD_DONE" && rm "$MOD_INSTALLING"
@@ -65,20 +76,21 @@ mod_remove () {
     local init_path=ProgramFiles/etc/init.d
 
     echo Restoring init script
-    cp /mnt/hack/unused/"$init_path"/rc.local /mnt/"$init_path"/rc.local
+    cp "$MOD_DIR"/unused/"$init_path"/rc.local "$JFFS2_DIR"/"$init_path"/rc.local
 
     echo Restoring vihome app data and removing hack files
-    rm /mnt/actually_mnt/logs
+    rm "$NEW_MNT"/logs
+    {% set unused_dir = fs.mod_dir / "unused" %}
     (
-        cd /mnt/hack/unused/ &&
+        cd {{ unused_dir | quote_sh }} &&
         mv device_manager.db \
         kvdata.db \
         log.db \
         logs/ \
         vihome2.db \
         zigbee_information \
-        ../../../actually_mnt/
-    ) && rm -rf /mnt/actually_mnt/hack/
+        {{ new_mnt | relative_to(unused_dir) | quote_sh }}
+    ) && rm -rf {{ new_mnt / fs.mod_dir_name }}
 
     echo "Uninstall done"
 }

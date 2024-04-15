@@ -1,13 +1,19 @@
 #!/bin/sh
 
+JFFS2_DIR={{ fs.jffs2_dir | quote_sh }}
+NEW_MNT="$JFFS2_DIR"/{{ fs.new_mnt | quote_sh }}
+MOD_DIR_NAME={{ fs.mod_dir_name | quote_sh }}
+MOD_INIT_DIR={{ fs.mod_init_dir | quote_sh }}
+MOD_DIR="$JFFS2_DIR"/"$MOD_DIR_NAME"
+
 # Setup JFFS2 partition so that is not excessively
 # written to
-umount /mnt &&
-mount -t ramfs ramfs /mnt &&
-mkdir /mnt/actually_mnt &&
-mount -t jffs2 /dev/mtdblock2 /mnt/actually_mnt/ &&
-ln -s /mnt/actually_mnt/hack /mnt/hack &&
-ln -s /mnt/actually_mnt/ProgramFiles /mnt/ProgramFiles &&
-ln -s /tmp/logs /mnt/logs &&
+umount "$JFFS2_DIR" &&
+mount -t ramfs ramfs "$JFFS2_DIR" &&
+mkdir "$NEW_MNT" &&
+mount -t jffs2 /dev/mtdblock2 "$NEW_MNT" &&
+ln -s "$NEW_MNT"/"$MOD_DIR_NAME" "$MOD_DIR" &&
+ln -s "$NEW_MNT"/ProgramFiles "$JFFS2_DIR"/ProgramFiles &&
+ln -s /tmp/logs "$JFFS2_DIR"/logs &&
 
-/mnt/hack/init/continue.sh
+"$MOD_INIT_DIR"/continue.sh

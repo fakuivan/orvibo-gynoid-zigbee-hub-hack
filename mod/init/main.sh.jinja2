@@ -1,14 +1,18 @@
 #!/bin/sh
+IP_ADDR={{ config.ip_addr | quote_sh }}
+IP_MASK={{ config.ip_netmask | quote_sh }}
+MOD_INIT_DIR={{ fs.mod_init_dir | quote_sh }}
+PATH="$PATH":{{ fs.mod_bin_dir | quote_sh }}
 mkdir /tmp/logs
 pkill button
 pkill udhcpc
 pkill syslogd; syslogd -O /tmp/logs/run.log
 
-ifconfig eth1 '172.31.112.101' netmask '255.255.255.0'
+ifconfig eth1 "$IP_ADDR" netmask "$IP_MASK"
 
 # Copy init script to tmp so that it does not block
 # mnt from being unmounted. We also block so we exec
 # our way out
 
-cp /mnt/hack/init/fake_mnt.sh /tmp/fake_mnt.sh
+cp "$MOD_INIT_DIR"/fake_mnt.sh /tmp/fake_mnt.sh
 exec /tmp/fake_mnt.sh

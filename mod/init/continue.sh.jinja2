@@ -1,4 +1,11 @@
 #!/bin/sh
 
-/mnt/hack/serialgateway &
-/mnt/hack/init/zigbee_mcu.sh
+(
+    mount -t devpts devpts /dev/pts &&
+    dropbear \
+        -r {{ fs.dropbear_dir | quote_sh }}/ed25519_host_key \
+        -s -g -a -K 300
+) && pkill telnet
+
+serialgateway &
+init_zigbee_mcu.sh
