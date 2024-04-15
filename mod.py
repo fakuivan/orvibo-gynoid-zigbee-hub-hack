@@ -1,10 +1,15 @@
 from telnetlib import Telnet
 import re
-from ipaddress import IPv4Address
-from pathlib import Path
+from ipaddress import IPv4Address, IPv4Interface
+from pathlib import Path, PurePosixPath as PPPath
 import tarfile
-from io import BytesIO
+from io import BytesIO, TextIOBase
 from utils import wait_for_command, assert_command, pipe_binary, chunked, script
+from jinja2 import Template, Environment
+from shlex import quote as shq
+from collections.abc import Callable
+from typing import NamedTuple
+import os.path
 
 # only hashing program in device
 from hashlib import md5
@@ -38,7 +43,6 @@ def mini_hub_log_in(
 DEFAULT_FIRST_IP = IPv4Address("192.168.0.200")
 mod_dir = Path(__file__).resolve().parent / "mod"
 assert mod_dir.is_dir()
-mod_files = tuple(mod_dir / file for file in ("init/", "mod.sh", "serialgateway"))
 
 
 def stop_boot_sequence(tn: Telnet):
@@ -49,18 +53,101 @@ def stop_boot_sequence(tn: Telnet):
     )
 
 
-def upload_mod(tn: Telnet):
-    def reset_file(info: tarfile.TarInfo):
-        info.uid = 0
-        info.gid = 0
-        return info
+class FS(NamedTuple):
+    jffs2_dir = PPPath("/mnt")
+    mod_dir_name = PPPath("hack")
+    mod_init_dir_name = PPPath("init")
+    mod_bin_dir_name = PPPath("bin")
+    new_mnt = PPPath("actually_mnt")
+    dropbear_dir_name = PPPath("dropbear")
 
+    @property
+    def mod_dir(self) -> PPPath:
+        return self.jffs2_dir / self.mod_dir_name
+
+    @property
+    def mod_init_dir(self) -> PPPath:
+        return self.mod_dir / self.mod_init_dir_name
+
+    @property
+    def mod_bin_dir(self) -> PPPath:
+        return self.mod_dir / self.mod_bin_dir_name
+
+    @property
+    def dropbear_dir(self) -> PPPath:
+        return self.mod_dir / self.dropbear_dir_name
+
+
+class SSH(NamedTuple):
+    login_key: str
+    proxy_key: str
+
+
+class Config(NamedTuple):
+    ssh: SSH
+    ip_iface: IPv4Interface
+
+    @property
+    def ip_addr(self) -> IPv4Address:
+        return self.ip_iface.ip
+
+    @property
+    def ip_netmask(self) -> IPv4Address:
+        return self.ip_iface.netmask
+
+
+def get_environment(fs: FS, config: Config):
+    template_env = Environment()
+
+    def relative_to(path: PPPath | str, anchor: PPPath | str) -> PPPath:
+        path = PPPath(path)
+        anchor = PPPath(anchor)
+        base = PPPath(*os.path.commonprefix([path.parts, anchor.parts]))
+        moves_up = len(anchor.parts) - len(base.parts)
+        return PPPath(*(("..",) * moves_up), path.relative_to(base))
+
+    def quote_filter(obj) -> str:
+        acceptable_cls = (Path, IPv4Address, str, int, float, PPPath)
+        if not isinstance(obj, acceptable_cls):
+            raise TypeError(
+                f"Valid types to quote are {acceptable_cls}, got {type(obj)}"
+            )
+        return shq(str(obj))
+
+    template_env.filters["quote_sh"] = quote_filter
+    template_env.filters["relative_to"] = relative_to
+    template_env.globals = dict(fs=fs, config=config)
+    return template_env
+
+
+def gen_tarfile(render: Callable[[TextIOBase], str]) -> BytesIO:
     # writes completely to ram then pushes, file is small so np
     tar_bytes = BytesIO()
     with tarfile.open(mode="w|gz", fileobj=tar_bytes) as tar_file:
-        for file in mod_files:
-            tar_file.add(file, file.relative_to(mod_dir), filter=reset_file)
+        for file in mod_dir.rglob("*"):
+            path_rel = file.relative_to(mod_dir)
+            info = tarfile.TarInfo(str(path_rel)).replace(uid=0, gid=0)
+            if file.is_dir():
+                info.type = tarfile.DIRTYPE
+                tar_file.addfile(info)
+                continue
 
+            assert file.is_file(), "Only regular files and directories are supported"
+            info.type = tarfile.REGTYPE
+            if file.suffix != ".jinja2":
+                with file.open("rb") as read_buff:
+                    tar_file.addfile(info, read_buff)
+                continue
+
+            info.name = str(path_rel.with_suffix(""))
+            with file.open("r") as read_buff:
+                tar_file.addfile(
+                    info, BytesIO(render(read_buff).encode(read_buff.encoding))
+                )
+    return tar_bytes
+
+
+def upload_mod(tn: Telnet, tar_bytes: BytesIO, script_name: str = "mod.sh"):
     assert_command(
         pipe_binary(
             tn, chunked(tar_bytes.getvalue(), 1024), *script("cat > /tmp/hack.tar.gz")
@@ -77,7 +164,7 @@ def upload_mod(tn: Telnet):
                 "mkdir /tmp/hack/ && "
                 "cd /tmp/hack/ && "
                 "tar xzf ../hack.tar.gz && "
-                "chmod +x ./mod.sh"
+                f"chmod +x ./{shq(script_name)}"
             ),
         )
     )
