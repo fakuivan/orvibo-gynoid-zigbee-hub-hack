@@ -126,7 +126,9 @@ def gen_tarfile(render: Callable[[TextIOBase], str]) -> BytesIO:
     with tarfile.open(mode="w|gz", fileobj=tar_bytes) as tar_file:
         for file in mod_dir.rglob("*"):
             path_rel = file.relative_to(mod_dir)
-            info = tarfile.TarInfo(str(path_rel)).replace(uid=0, gid=0)
+            info = tar_file.gettarinfo(file, str(path_rel))
+            info.uid = info.gid = 0
+            info.uname = info.gname = "root"
             if file.is_dir():
                 info.type = tarfile.DIRTYPE
                 tar_file.addfile(info)
@@ -141,9 +143,9 @@ def gen_tarfile(render: Callable[[TextIOBase], str]) -> BytesIO:
 
             info.name = str(path_rel.with_suffix(""))
             with file.open("r") as read_buff:
-                tar_file.addfile(
-                    info, BytesIO(render(read_buff).encode(read_buff.encoding))
-                )
+                rendered = BytesIO(render(read_buff).encode(read_buff.encoding))
+                info.size = len(rendered.getvalue())
+                tar_file.addfile(info, rendered)
     return tar_bytes
 
 
