@@ -45,10 +45,12 @@ mod_dir = Path(__file__).resolve().parent / "mod"
 assert mod_dir.is_dir()
 
 
-def stop_boot_sequence(tn: Telnet):
+def stop_boot_sequence(tn: Telnet, timeout: float | None = None):
     assert_command(
         wait_for_command(
-            tn, raw="pkill rc.local -f && pkill -f wait_until_network_ready"
+            tn,
+            raw="pkill rc.local -f && pkill -f wait_until_network_ready",
+            timeout=timeout,
         )
     )
 
@@ -149,30 +151,43 @@ def gen_tarfile(render: Callable[[TextIOBase], str]) -> BytesIO:
     return tar_bytes
 
 
-def upload_mod(tn: Telnet, tar_bytes: BytesIO, script_name: str = "mod.sh"):
+def upload_mod(
+    tn: Telnet,
+    tar_bytes: BytesIO,
+    base_dir: PPPath = PPPath("/tmp/hack"),
+    script_name: str = "mod.sh",
+    timeout: float | None = None,
+):
+    tar_file_path = base_dir.with_suffix(".tar.gz")
     assert_command(
         pipe_binary(
-            tn, chunked(tar_bytes.getvalue(), 1024), *script("cat > /tmp/hack.tar.gz")
+            tn,
+            chunked(tar_bytes.getvalue(), 1024),
+            *script(f"cat > {shq(str(tar_file_path))}"),
+            timeout=timeout,
         )
     )
     checksum, _ = assert_command(
-        wait_for_command(tn, "md5sum", "/tmp/hack.tar.gz")
+        wait_for_command(tn, "md5sum", str(tar_file_path), timeout=timeout)
     ).split(b"  ", 2)
     assert md5(tar_bytes.getvalue()).hexdigest().encode() == checksum
     assert_command(
         wait_for_command(
             tn,
             *script(
-                "mkdir /tmp/hack/ && "
-                "cd /tmp/hack/ && "
-                "tar xzf ../hack.tar.gz && "
+                f"mkdir {shq(str(tar_file_path))} && "
+                f"cd {shq(str(tar_file_path))} && "
+                f"tar xzf ../{shq(tar_file_path.name)} && "
                 f"chmod +x ./{shq(script_name)}"
             ),
+            timeout=timeout,
         )
     )
 
 
-def set_sysled(tn, on: bool = True, blink: bool = False):
+def set_sysled(tn, on: bool = True, blink: bool = False, timeout: float | None = None):
     assert_command(
-        wait_for_command(tn, "sysled", str(0 if not on else 2 if blink else 1))
+        wait_for_command(
+            tn, "sysled", str(0 if not on else 2 if blink else 1), timeout=timeout
+        )
     )
