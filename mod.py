@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from telnetlib import Telnet
 import re
 from ipaddress import IPv4Address, IPv4Interface
@@ -8,8 +9,9 @@ from utils import wait_for_command, assert_command, pipe_binary, chunked, script
 from jinja2 import Template, Environment
 from shlex import quote as shq
 from collections.abc import Callable
-from typing import NamedTuple
+from typing import NamedTuple, Annotated
 import os.path
+import typer
 
 # only hashing program in device
 from hashlib import md5
@@ -187,3 +189,23 @@ def set_sysled(tn, on: bool = True, blink: bool = False, timeout: float | None =
             tn, "sysled", str(0 if not on else 2 if blink else 1), timeout=timeout
         )
     )
+
+
+app = typer.Typer()
+
+
+@app.command()
+def build_tar(
+    network_iface: Annotated[IPv4Interface, typer.Argument(parser=IPv4Interface)],
+    ssh_login_key: str,
+    ssh_proxy_key: str,
+    output_file: typer.FileBinaryWrite,
+):
+    dev_config = Config(SSH(ssh_login_key, ssh_proxy_key), network_iface)
+    env = get_environment(FS(), dev_config)
+    with tarfile.open(mode="w|gz", fileobj=output_file) as tar_file:
+        fill_tarfile(tar_file, render_from(env))
+
+
+if __name__ == "__main__":
+    app()
