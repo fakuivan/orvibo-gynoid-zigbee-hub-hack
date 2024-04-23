@@ -6,7 +6,7 @@ from pathlib import Path, PurePosixPath as PPPath
 import tarfile
 from io import BytesIO, TextIOBase
 from utils import wait_for_command, assert_command, pipe_binary, chunked, script
-from jinja2 import Template, Environment
+from jinja2 import Environment
 from shlex import quote as shq
 from collections.abc import Callable
 from typing import NamedTuple, Annotated
