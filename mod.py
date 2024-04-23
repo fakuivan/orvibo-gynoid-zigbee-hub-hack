@@ -122,33 +122,29 @@ def get_environment(fs: FS, config: Config):
     return template_env
 
 
-def gen_tarfile(render: Callable[[TextIOBase], str]) -> BytesIO:
-    # writes completely to ram then pushes, file is small so np
-    tar_bytes = BytesIO()
-    with tarfile.open(mode="w|gz", fileobj=tar_bytes) as tar_file:
-        for file in mod_dir.rglob("*"):
-            path_rel = file.relative_to(mod_dir)
-            info = tar_file.gettarinfo(file, str(path_rel))
-            info.uid = info.gid = 0
-            info.uname = info.gname = "root"
-            if file.is_dir():
-                info.type = tarfile.DIRTYPE
-                tar_file.addfile(info)
-                continue
+def fill_tarfile(tar_file: tarfile.TarFile, render: Callable[[TextIOBase], str]):
+    for file in mod_dir.rglob("*"):
+        path_rel = file.relative_to(mod_dir)
+        info = tar_file.gettarinfo(file, str(path_rel))
+        info.uid = info.gid = 0
+        info.uname = info.gname = "root"
+        if file.is_dir():
+            info.type = tarfile.DIRTYPE
+            tar_file.addfile(info)
+            continue
 
-            assert file.is_file(), "Only regular files and directories are supported"
-            info.type = tarfile.REGTYPE
-            if file.suffix != ".jinja2":
-                with file.open("rb") as read_buff:
-                    tar_file.addfile(info, read_buff)
-                continue
+        assert file.is_file(), "Only regular files and directories are supported"
+        info.type = tarfile.REGTYPE
+        if file.suffix != ".jinja2":
+            with file.open("rb") as read_buff:
+                tar_file.addfile(info, read_buff)
+            continue
 
-            info.name = str(path_rel.with_suffix(""))
-            with file.open("r") as read_buff:
-                rendered = BytesIO(render(read_buff).encode(read_buff.encoding))
-                info.size = len(rendered.getvalue())
-                tar_file.addfile(info, rendered)
-    return tar_bytes
+        info.name = str(path_rel.with_suffix(""))
+        with file.open("r") as read_buff:
+            rendered = BytesIO(render(read_buff).encode(read_buff.encoding))
+            info.size = len(rendered.getvalue())
+            tar_file.addfile(info, rendered)
 
 
 def upload_mod(
