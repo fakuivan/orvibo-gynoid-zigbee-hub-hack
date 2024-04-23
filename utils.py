@@ -88,14 +88,20 @@ def pipe_binary(
     return int(result[-3:]), result[:-5]
 
 
-class RemoteCommandError(RuntimeError):
-    pass
+class RemoteCommandError(Exception):
+    def __init__(self, code: int, output: bytes, message: str | None = None):
+        super().__init__(
+            message
+            if message is not None
+            else f"Failed to execute command, got code {code} with message:\n"
+            f"{message}"
+        )
+        self.code = code
+        self.output = output
 
 
 def assert_command(result: tuple[int, bytes]) -> bytes:
-    code, message = result
+    code, output = result
     if code == 0:
-        return message
-    raise RemoteCommandError(
-        f"Failed to execute command, got code {code} with message:\n" f"{message}"
-    )
+        return output
+    raise RemoteCommandError(code, output)
