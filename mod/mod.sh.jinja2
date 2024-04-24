@@ -58,13 +58,16 @@ mod_install () {
     echo Setting executable permissions
     chmod +x "$MOD_INIT_DIR"/*
     chmod +x "$MOD_BIN_DIR"/*
+    for program in dropbear ssh ssh-keygen dropbearconvert; do
+        ln -s dropbearmulti "$MOD_BIN_DIR"/"$program"
+    done
 
     echo Modifying init sequence
     mkdir -p "$MOD_DIR"/unused/"$init_path"/
 
     {% set jffs2_init_path = fs.jffs2_dir / init_path %}
     cp "$JFFS2_DIR"/"$init_path"/rc.local "$MOD_DIR"/unused/"$init_path"/ &&
-        ln -sf {{ fs.mod_init_dir / "main.sh" | relative_to(jffs2_init_path) | quote_sh }} \
+        ln -sf {{ (fs.mod_init_dir / "main.sh") | relative_to(jffs2_init_path) | quote_sh }} \
             {{ jffs2_init_path | quote_sh }}/rc.local
 
     echo "Install done"
