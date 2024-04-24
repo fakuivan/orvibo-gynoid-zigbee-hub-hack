@@ -43,6 +43,8 @@ def mini_hub_log_in(
 
 
 DEFAULT_FIRST_IP = IPv4Address("192.168.0.200")
+DEFAULT_USERNAME = "root"
+DEFAULT_PASSWORD = "sidlee"
 mod_dir = Path(__file__).resolve().parent / "mod"
 assert mod_dir.is_dir()
 
@@ -98,6 +100,10 @@ class Config(NamedTuple):
     @property
     def ip_netmask(self) -> IPv4Address:
         return self.ip_iface.netmask
+
+
+def render_from(env: Environment) -> Callable[[TextIOBase], str]:
+    return lambda template: env.from_string(template.read()).render()
 
 
 def get_environment(fs: FS, config: Config):
@@ -205,6 +211,62 @@ def build_tar(
     env = get_environment(FS(), dev_config)
     with tarfile.open(mode="w|gz", fileobj=output_file) as tar_file:
         fill_tarfile(tar_file, render_from(env))
+
+
+@app.command()
+def telnet_pipe(
+    input: typer.FileBinaryRead,
+    command: list[str],
+    ip: Annotated[IPv4Address, typer.Option(parser=IPv4Address)] = DEFAULT_FIRST_IP,
+    port: int = 23,
+    username: str = DEFAULT_USERNAME,
+    password: str = DEFAULT_PASSWORD,
+    timeout: float = 10,
+):
+    with Telnet(str(ip), port=port, timeout=timeout) as tn:
+        mini_hub_log_in(tn, username, password)
+        code, output = pipe_binary(
+            tn, iter(lambda: input.read(1024), b""), *command, timeout=timeout
+        )
+        typer.echo(output)
+        raise typer.Exit(code)
+
+
+@app.command(
+    help=f"""
+    Stops the booting sequence by loggin into the hub via telnet and killing the init
+    script.
+
+    The hub will first look for a DHCP address for about 10 seconds while flashing the
+    LED. If no DHCP server responds, it enters into a mode where it assigns itself the
+    address {DEFAULT_FIRST_IP}, pings address .1 and then it continues increasing the
+    third octate until it finds a gateway.
+    We can make use of this first IP by quickly logging in and killing the init sequence
+    before it changes to the next address.
+    """
+)
+def stop_boot(
+    ip: Annotated[IPv4Address, typer.Option(parser=IPv4Address)] = DEFAULT_FIRST_IP,
+    port: int = 23,
+    wait: Annotated[
+        bool,
+        typer.Option(
+            "--wait",
+            "-w",
+            help="Prompts for a key press to then connect via telnet",
+        ),
+    ] = False,
+    username: str = DEFAULT_USERNAME,
+    password: str = DEFAULT_PASSWORD,
+    timeout: float = 10,
+):
+    if wait:
+        typer.pause(
+            "Press any key 4 to 7 senconds after the hub LED stops blinking (blinks about 9 times)..."
+        )
+    with Telnet(str(ip), port=port, timeout=timeout) as tn:
+        mini_hub_log_in(tn, username, password, timeout=timeout)
+        stop_boot_sequence(tn, timeout)
 
 
 if __name__ == "__main__":
