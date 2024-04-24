@@ -94,7 +94,7 @@ class RemoteCommandError(Exception):
             message
             if message is not None
             else f"Failed to execute command, got code {code} with message:\n"
-            f"{message}"
+            f"{output}"
         )
         self.code = code
         self.output = output
