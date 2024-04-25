@@ -3,6 +3,7 @@ IP_ADDR={{ config.ip_addr | quote_sh }}
 IP_MASK={{ config.ip_netmask | quote_sh }}
 MOD_INIT_DIR={{ fs.mod_init_dir | quote_sh }}
 export PATH="$PATH":{{ fs.mod_bin_dir | quote_sh }}
+export PATH_BOOT="$PATH"
 mkdir /tmp/logs
 pkill button
 pkill udhcpc
