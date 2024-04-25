@@ -65,9 +65,12 @@ mod_install () {
     echo Setting executable permissions
     chmod +x "$MOD_INIT_DIR"/*
     chmod +x "$MOD_BIN_DIR"/*
+    echo Setting up dropbear
     for program in dropbear ssh ssh-keygen dropbearconvert; do
         ln -s dropbearmulti "$MOD_BIN_DIR"/"$program"
     done
+    mkdir "$MOD_DIR"/dropbear/
+    "$MOD_BIN_DIR"/ssh-keygen -t ed25519 -f "$MOD_DIR"/dropbear/ed25519_host_key
 
     echo Modifying init sequence
     mkdir -p "$MOD_DIR"/unused/"$init_path"/
