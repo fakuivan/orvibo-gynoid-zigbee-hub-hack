@@ -36,6 +36,13 @@ check_not_in_progress () {
 mod_install () {
     {% set init_path = "ProgramFiles/etc/init.d" %}
     local init_path={{ init_path | quote_sh }}
+    echo Stopping programs
+    for program in button syslogd udhcpc; do
+        pkill "$program" || true
+    done
+    pkill -f record_last_time || true
+    echo Waiting for programs to terminate...
+    sleep 10
 
     echo Copying hack to persistent storage
     cp -r "$SCRIPT_DIR" "$MOD_DIR"
@@ -48,7 +55,7 @@ mod_install () {
         mv device_manager.db \
         kvdata.db \
         log.db \
-        logs \
+        logs/ \
         vihome2.db \
         zigbee_information \
         "$MOD_DIR"/unused/
