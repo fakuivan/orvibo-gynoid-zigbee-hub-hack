@@ -54,8 +54,7 @@ echo jn_reset 0 > /proc/gpio
 
 `jn_reset` seems to be a reference to other board revisions that use a JN5168A
 as the ZigBee MCU, setting it to zero enables the MCU and setting it to 1 disables
-it. This does not seem to be enough to initialize the MCU though, it seems like
-the vihome program does something extra to initialize it.
+it. The baud rate to communicate with the MCU is 57600.
 
 ### Default credentials
 

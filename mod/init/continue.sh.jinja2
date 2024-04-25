@@ -7,5 +7,4 @@
         -s -g -a -K 300 -e
 ) && pkill telnet
 
-serialgateway &
-init_zigbee_mcu.sh
+serialgateway -b 57600 &
