@@ -70,6 +70,8 @@ it. The baud rate to communicate with the MCU is 57600.
   upgrade mechanism.
 * Complete readme :P
 * Add command to stop init process and install the mod from scratch.
+* Allow for serialgateway to listen on localhost, that way SSH can be used
+  to secure communications between HA and the ZigBee MCU
 
 ## Resources
 
