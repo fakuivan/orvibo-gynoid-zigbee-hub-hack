@@ -61,6 +61,16 @@ it. The baud rate to communicate with the MCU is 57600.
 * Username: `root`
 * Password: `sidlee`
 
+## TODO
+
+* The whole jinja2 for scripts is kinda tedious since we're just using it to
+  assign variables from the scripts, it'd be a better idea just render a variables
+  and then source them from scripts.
+* Allow for the install script to run after uninstalling, or have some sort of
+  upgrade mechanism.
+* Complete readme :P
+* Add command to stop init process and install the mod from scratch.
+
 ## Resources
 
 * [YouTube: Smart Home Security Device: Mini Hub](https://www.youtube.com/watch?v=MCF9CpP_XHo): a look at the hardware for a different revision of this hub
