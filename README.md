@@ -3,12 +3,12 @@
 This repo contains some scripts to bypass the controller software
 included with these hubs and replace them with a simple TCP relay.
 The gateway software and much of the initial investigation into
-this hub was possible thanks to
-[banksy-git/lidl-gateway-freedom](https://github.com/banksy-git/lidl-gateway-freedom)
-and the blog posts
-[Hacking the Silvercrest (Lidl) Smart Home Gateway](https://paulbanks.org/projects/lidl-zigbee/)
-and
-[Cloud-free integration with Home Assistant](https://paulbanks.org/projects/lidl-zigbee/ha/).
+this hub was possible thanks to [banksy-git/lidl-gateway-freedom](
+https://github.com/banksy-git/lidl-gateway-freedom) and the blog
+posts [Hacking the Silvercrest (Lidl) Smart Home Gateway](
+https://paulbanks.org/projects/lidl-zigbee/) and
+[Cloud-free integration with Home Assistant](
+https://paulbanks.org/projects/lidl-zigbee/ha/).
 
 ## Hardware
 
@@ -75,5 +75,10 @@ it. The baud rate to communicate with the MCU is 57600.
 
 ## Resources
 
-* [YouTube: Smart Home Security Device: Mini Hub](https://www.youtube.com/watch?v=MCF9CpP_XHo): a look at the hardware for a different revision of this hub
-* [4pda.to: Smart home - General topic](https://4pda.to/forum/index.php?showtopic=789600&st=3760#entry104809531): post showing the chips in a "Hommyn Zigbee Hub (HU-20-Z)", a rebrand of the orvibo hub. HW revision is V1.2
+* [YouTube: Smart Home Security Device: Mini Hub](
+  https://www.youtube.com/watch?v=MCF9CpP_XHo): a look at the hardware
+  for a different revision of this hub
+* [4pda.to: Smart home - General topic](
+  https://4pda.to/forum/index.php?showtopic=789600&st=3760#entry104809531):
+  post showing the chips in a "Hommyn Zigbee Hub (HU-20-Z)", a rebrand of the
+  orvibo hub. HW revision is V1.2
