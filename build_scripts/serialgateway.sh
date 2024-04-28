@@ -10,7 +10,7 @@ ln -s mips-linux-uclibc-gcc-4.4.7 /sdk/bin/mips-linux-uclibc-gcc
 
 git clone https://github.com/fakuivan/lidl-gateway-freedom.git /program
 cd /program/gateway
-git checkout 'Release-1.3.1'
+git checkout 'Release-1.4'
 GIT_VERSION="$(git describe --all --long --dirty --always)"
 
 mips-linux-gcc \
