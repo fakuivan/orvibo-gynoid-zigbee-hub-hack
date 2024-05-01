@@ -23,10 +23,8 @@ UART TTL 3.3V for the SOC, and a JTAG header to the ZigBee MCU. I've only tested
 UART to the SOC however. There's space on the board for a WiFi chip, but it's
 been left unpopulated on this model.
 
-I haven't taken the time to fully determine how the MCU and the SOC communicate with
-each other, it's not clear if it's TTL UART with flow control or if it's using SPI
-and pumping serial communication and firmware updates trough that. My bet is that
-it's using UART with flow control.
+The MCU and the SOC communicate via UART at 57600 bps with pins PB1 and PB2
+on the MCU.
 
 You can find pictures of the board and case in [res/images](./res/images/)
 
