@@ -1,0 +1,1 @@
+ps | awk '$5~/vihomed/ {print $1; exit}' | xargs kill -USR2

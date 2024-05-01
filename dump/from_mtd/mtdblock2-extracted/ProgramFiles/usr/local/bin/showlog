@@ -1,4 +1,0 @@
-#!/bin/sh
-LOG_FILE=/var/log/messages
-echo "" > $LOG_FILE
-tail -f $LOG_FILE

@@ -1,3 +1,0 @@
-#!/bin/sh
-sysled 0
-echo "1" > /proc/watchdog_reboot

@@ -1,0 +1,19 @@
+#/bin/sh
+
+if [ $# -lt 3 ]; then
+    echo "flash_led times on off"
+    exit
+fi
+
+times=$1
+on_sec=$2
+off_sec=$3
+
+count=0
+while [ $count -lt $times ]; do
+    count=$(($count+1))
+    sysled 0
+    sleep $off_sec
+    sysled 1
+    sleep $on_sec
+done

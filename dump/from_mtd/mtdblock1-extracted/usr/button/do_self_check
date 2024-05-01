@@ -1,8 +1,0 @@
-if [ -e /usr/local/button/do_self_check ]; then
-    sh /usr/local/button/do_self_check
-    exit 0
-fi
-
-flash_led 4 0.08 0.08
-
-write_log button INFO "do self check, this function is undo."

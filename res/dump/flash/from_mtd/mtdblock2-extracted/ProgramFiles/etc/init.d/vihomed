@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Copyright (C) 2010-2011 Orvibo
+#
+# Change Logs:
+# Date          Author      Note
+# 2015-08-25    Sid Lee     去除对avahi的支持
+
+PID_FILE=/tmp/vihomed.pid
+TAG_FILE=/tmp/enable_vihomed
+
+start() {
+    if [ ! -f /mnt/device_manager.db ]; then
+        cp /usr/local/files/empty_datastore.db /mnt/device_manager.db
+    fi
+
+    vihomed -t 1
+    touch $TAG_FILE
+}
+
+stop()	{
+    [ -f $TAG_FILE ] && rm -f $TAG_FILE
+
+    if [ -f $PID_FILE ]; then
+        kill `cat $PID_FILE`
+        rm -f $PID_FILE
+    fi
+
+    sleep 2
+    /usr/local/bin/write-log.sh INFO "========= OHost Terminated ========="
+    killall -9 vihomed
+}
+
+############################
+cmd=$1
+case $cmd in 
+start) start;;
+stop) stop;;
+restart) stop; start;;
+*) echo "Unknow command $cmd"
+esac

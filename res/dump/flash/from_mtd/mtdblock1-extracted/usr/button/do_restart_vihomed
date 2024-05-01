@@ -1,0 +1,10 @@
+if [ -e /usr/local/button/do_restart_vihomed ]; then
+    sh /usr/local/button/do_restart_vihomed
+    exit 0
+fi
+
+flash_led 4 0.08 0.08
+
+write_log button INFO "restart vihomed"
+/etc/init.d/vihomed stop
+/etc/init.d/vihomed start

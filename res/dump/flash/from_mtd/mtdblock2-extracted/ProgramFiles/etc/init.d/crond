@@ -1,0 +1,33 @@
+#!/bin/sh
+# Copyright (C) 2010-2011 Orvibo
+#
+# crond 服务的启动脚本
+#
+# Change Logs:
+# Date          Author      Note
+# 2015-08-27    Sid Lee     创建
+
+crontabs_dir=/var/spool/cron/crontabs
+
+start() {
+    if [ ! -f $crontabs_dir ]; then
+        mkdir -p `dirname $crontabs_dir`
+        ln -s /etc/crontabs $crontabs_dir
+    fi
+    echo "crond start"
+    crond
+}
+
+stop()	{
+	killall crond
+    echo "crond stop"
+}
+
+############################
+cmd=$1
+case $cmd in 
+start) start;;
+stop) stop;;
+restart) stop; start;;
+*) echo "Unknow command $cmd"
+esac

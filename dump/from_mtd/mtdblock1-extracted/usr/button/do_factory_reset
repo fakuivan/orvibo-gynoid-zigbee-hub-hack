@@ -1,9 +1,0 @@
-if [ -e /usr/local/button/do_factory_reset ]; then
-    sh /usr/local/button/do_factory_reset
-    exit 0
-fi
-
-flash_led 4 0.08 0.08
-
-write_log button INFO "factory reset"
-factory_reset

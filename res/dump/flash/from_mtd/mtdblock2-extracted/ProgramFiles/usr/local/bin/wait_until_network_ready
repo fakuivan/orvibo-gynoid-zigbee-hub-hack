@@ -1,0 +1,104 @@
+#!/bin/sh
+
+dhcp_wait_time=10
+ping_test_time=600
+
+sysled_1_blink() {
+    sysled 1; usleep 100000
+    sysled 0
+}
+
+sysled_2_blink() {
+    sysled 1; usleep 100000
+    sysled 0; usleep 100000
+    sysled 1; usleep 100000
+    sysled 0
+}
+
+sysled_3_blink() {
+    sysled 1; usleep 100000
+    sysled 0; usleep 100000
+    sysled 1; usleep 100000
+    sysled 0; usleep 100000
+    sysled 1; usleep 100000
+    sysled 0
+}
+
+read_local_ip() {
+    ifconfig eth1 | awk '/inet addr/{print $2}' | awk -F: '{print $2}'
+}
+
+ping_with() {
+    ping -c1 $1 > /dev/null 2>&1 
+    return $?
+}
+
+allocate_local_ip_manual() {
+    echo "allocate_local_ip_manual"
+    netaddr=0
+    while true; do
+        new_ip="192.168.${netaddr}.200"
+        new_gw="192.168.${netaddr}.1"
+        echo "try $new_ip"
+        ifconfig eth1 "$new_ip" netmask '255.255.255.0'
+        if ping_with "$new_gw" ; then
+            echo "$new_ip is OK"
+            setup_network "$new_gw" "$new_gw"
+            return
+        fi
+
+        curr_ip=`read_local_ip`
+        if [ "x$curr_ip" != "x$new_ip" ]; then
+            echo "Get IP from DHCP, $curr_ip"
+            return
+        fi
+
+        sysled_2_blink
+        netaddr=$(($netaddr+1))
+        if [ $netaddr -ge 254 ]; then
+            echo "can't allocate IP"
+            fast_reboot
+        fi
+    done
+}
+
+allocate_local_ip() {
+    count=0
+    while true; do
+        local_ip=`read_local_ip`
+        if [ -n "$local_ip" ]; then
+            echo "Get IP address: $local_ip"
+            return 0
+        fi
+        count=$(($count+1))
+        if [ $count -ge $dhcp_wait_time ]; then
+            allocate_local_ip_manual
+            return 0
+        fi
+        sysled_1_blink
+        echo "wait for ip address, $count"
+        sleep 1
+    done
+}
+
+#test ping with 'homemate.orvibo.com'
+test_network() {
+    count=0
+    while true; do
+        echo "test network"
+        if ping_with 'homemate.orvibo.com' ; then
+            echo "pass"
+            return 0
+        fi
+        count=$(($count+1))
+        if [ $count -ge $ping_test_time ]; then
+            fast_reboot
+        fi
+        sysled_3_blink
+        sleep 1
+    done
+}
+
+#################
+allocate_local_ip
+#test_network

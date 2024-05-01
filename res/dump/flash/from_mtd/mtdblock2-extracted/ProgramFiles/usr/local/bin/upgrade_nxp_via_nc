@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ $# -eq 0 ]; then
+    echo "Usage: `basename $0` <ip> [port]"
+    exit
+fi
+
+IP=$1
+PORT1=5702
+PORT2=5712
+FILE=/tmp/zigbee.bin
+
+echo "== Upgrade from $IP $PORT =="
+sum1=$(nc $IP $PORT2)
+
+nc $IP $PORT1 > $FILE
+sum2=$(md5sum $FILE | awk '{print $1}')
+
+echo "$sum1, $sum2"
+if [ "x$sum1" != "x" -a "x$sum1" = "x$sum2" ]; then
+    upgradefile_local.sh
+    echo "== DONE =="
+else
+    echo "== SUM ERROR =="
+fi
+rm $FILE

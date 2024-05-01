@@ -1,0 +1,29 @@
+#!/bin/sh
+# Copyright (C) 2010-2011 Orvibo
+#
+# proxy_system_daemon服务的启动脚本
+#
+# Change Logs:
+# Date          Author      Note
+# 2015-09-01    Sid Lee     创建
+
+EXEC=proxy_system_daemon
+
+start() {
+    $EXEC
+    echo "$EXEC start"
+}
+
+stop()	{
+	killall $(EXEC)
+    echo "$EXEC stop"
+}
+
+############################
+cmd=$1
+case $cmd in 
+start) start;;
+stop) stop;;
+restart) stop; start;;
+*) echo "Unknow command $cmd"
+esac

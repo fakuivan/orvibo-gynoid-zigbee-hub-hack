@@ -1,2 +1,0 @@
-#!/bin/sh
-echo "sys_led $1" > /proc/gpio

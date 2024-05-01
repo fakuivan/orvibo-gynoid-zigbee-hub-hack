@@ -1,0 +1,17 @@
+#!/bin/sh
+
+PROGRAM_1=process_monitor
+PROGRAM_2=super_monitor
+
+start() {
+    $PROGRAM_1 &
+    $PROGRAM_2 &
+    echo "vihomed_monitor start"
+}
+
+############################
+cmd=$1
+case $cmd in 
+start) start;;
+*) echo "Unknow command $cmd"
+esac

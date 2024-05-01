@@ -1,8 +1,0 @@
-#!/bin/sh
-
-source run_process_func.inc
-
-while true; do
-    sleep 119
-    run_process_if_it_down   'process_monitor'  'process_monitor &'
-done

@@ -28,7 +28,7 @@ each other, it's not clear if it's TTL UART with flow control or if it's using S
 and pumping serial communication and firmware updates trough that. My bet is that
 it's using UART with flow control.
 
-TODO: Board pictures
+You can find pictures of the board and case in [res/images](./res/images/)
 
 ## Software
 
