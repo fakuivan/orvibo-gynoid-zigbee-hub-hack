@@ -69,6 +69,7 @@ unusable.
 
 It's possible however to open the case and connect an external UART adapter with
 a pull up resistor on its TX line and use that to communicate with the bootloader.
+Baud rate for the bootloader is 115200 bps.
 
 The three pads on top of the NCP as seen in [the top PCB view](res/images/pcb_top_1.png)
 hook up to the same UART lines used by the SOC to communicate with the NCP.
