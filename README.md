@@ -59,6 +59,57 @@ it. The baud rate to communicate with the MCU is 57600.
 * Username: `root`
 * Password: `sidlee`
 
+## Upgrading firmware on NCP
+
+The device seems to have the ability to update the EmberZNet firmware from the same
+UART port it uses for communication, however there seems to be some hardware error
+where the RX line on the NCP is left floating when booting the bootloader.
+The lack of a pull up resistor on this line means that the bus is effectively
+unusable.
+
+It's possible however to open the case and connect an external UART adapter with
+a pull up resistor on its TX line and use that to communicate with the bootloader.
+
+The three pads on top of the NCP as seen in [the top PCB view](res/images/pcb_top_1.png)
+hook up to the same UART lines used by the SOC to communicate with the NCP.
+From left to right the pads are: `GND`, `RX on the NCP` and `TX on the NCP`.
+Keep in mind that regular communications (outside the bootloader), require
+hardware flow control with the RTS and CTS lines. To avoid messing with the
+RTS and CTS lines you can fire the bootloader from the serialgateway using
+the bellows command like so: `bellows -d socket://<ip of the hub>:8888 bootloader`.
+
+Once you connect via UART, press enter and you'll get the following prompt:
+
+```
+EFR 32Serial Btl v5.7.4.0 b99
+1. upload ebl
+2. run
+3. ebl info
+> 
+```
+
+The [walthowd/husbzb-firmware](https://github.com/walthowd/husbzb-firmware/tree/master)
+repo [provides a script](
+https://github.com/walthowd/husbzb-firmware/blob/d6a512ccb2d770d4fdabdc27805ddd68fde96988/ncp.py#L339)
+to upload the firmware using XMODEM
+
+[Here's](
+https://github.com/grobasoz/zigbee-firmware/blob/a43872cf19a078712add54b34ecb44cd31ee6b46/EM3581/NCP_USW_EM3581-LR_678-57k6.ebl)
+the latest firmware I was able to find for this chip, if you find something newer,
+you're welcome to open an issue.
+
+### Notes
+
+Interestingly, with the current situation of the pull up resistors, it would seem
+as though the SOC would be unable to update the NCP firmware on its own. I tried
+running the function [update_zigbee](
+res/dump/flash/from_mtd/mtdblock2-extracted/ProgramFiles/usr/local/bin/upgrade_functions.sh#L89-L116)
+but I couldn't get it to work, the [JennicModuleProgrammer](
+res/dump/flash/from_mtd/mtdblock2-extracted/ProgramFiles/usr/local/bin/JennicModuleProgrammer)
+program messes with the GPIOs (`echo jn_update 1 > /proc/gpio`) to apparently set
+the NCP into programming mode, but again the lack of a pull up resistor messes
+with the UART bus anyways.
+
 ## TODO
 
 * The whole jinja2 for scripts is kinda tedious since we're just using it to
