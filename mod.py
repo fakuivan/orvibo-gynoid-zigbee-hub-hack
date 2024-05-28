@@ -5,7 +5,15 @@ from ipaddress import IPv4Address, IPv4Interface
 from pathlib import Path, PurePosixPath as PPPath
 import tarfile
 from io import BytesIO, TextIOBase
-from utils import wait_for_command, assert_command, pipe_binary, chunked, script
+from utils import (
+    wait_for_command,
+    assert_command,
+    pipe_binary,
+    chunked,
+    script,
+    upload_binary,
+    feed_from,
+)
 from jinja2 import Environment
 from shlex import quote as shq
 from collections.abc import Callable
@@ -163,18 +171,12 @@ def upload_mod(
     timeout: float | None = None,
 ):
     tar_file_path = base_dir.with_suffix(".tar.gz")
-    assert_command(
-        pipe_binary(
-            tn,
-            chunked(tar_bytes.getvalue(), 1024),
-            *script(f"cat > {shq(str(tar_file_path))}"),
-            timeout=timeout,
-        )
+    hash = md5()
+
+    hexdigest_local = upload_binary(
+        tn, feed_from(hash, chunked(tar_bytes.getvalue(), 1024)), tar_file_path
     )
-    checksum, _ = assert_command(
-        wait_for_command(tn, "md5sum", str(tar_file_path), timeout=timeout)
-    ).split(b"  ", 2)
-    assert md5(tar_bytes.getvalue()).hexdigest().encode() == checksum
+    assert hash.hexdigest() == hexdigest_local
     assert_command(
         wait_for_command(
             tn,
