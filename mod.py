@@ -12,6 +12,8 @@ from utils import (
     chunked,
     script,
     upload_binary,
+    RemoteCommandError,
+    InvalidHashError,
     feed_from,
 )
 from jinja2 import Environment
@@ -232,6 +234,41 @@ def telnet_pipe(
         )
         typer.echo(output)
         raise typer.Exit(code)
+
+
+@app.command()
+def telnet_upload(
+    input: typer.FileBinaryRead,
+    destination_path: Annotated[PPPath, typer.Argument(parser=PPPath)],
+    ip: Annotated[IPv4Address, typer.Option(parser=IPv4Address)] = DEFAULT_FIRST_IP,
+    port: int = 23,
+    username: str = DEFAULT_USERNAME,
+    password: str = DEFAULT_PASSWORD,
+    timeout: float = 10,
+):
+    with Telnet(str(ip), port=port, timeout=timeout) as tn:
+        mini_hub_log_in(tn, username, password)
+        hash = md5()
+
+        try:
+            hexdigest_remote = upload_binary(
+                tn,
+                feed_from(hash, iter(lambda: input.read(1024), b"")),
+                destination_path,
+                timeout=timeout,
+            )
+        except InvalidHashError as e:
+            typer.echo(f"Failed to recognize hash format: {e}", err=True)
+            raise typer.Exit(2) from e
+        except RemoteCommandError as e:
+            typer.echo(f"Failed to upload and hash file: {e.output}", err=True)
+            raise typer.Exit(e.code) from e
+
+        hexdigest_local = hash.hexdigest()
+        if hexdigest_local == hexdigest_remote:
+            raise typer.Exit(0)
+        typer.echo(f"Expected hash {hexdigest_local}, got {hexdigest_remote}", err=True)
+        raise typer.Exit(1)
 
 
 @app.command(
