@@ -113,7 +113,7 @@ class Config(NamedTuple):
 
 
 def render_from(env: Environment) -> Callable[[TextIOBase], str]:
-    return lambda template: env.from_string(template.read()).render()
+    return lambda template: env.from_string(template.read()).render() + "\n"
 
 
 def get_environment(fs: FS, config: Config):
