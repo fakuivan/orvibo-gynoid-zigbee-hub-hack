@@ -1,6 +1,6 @@
 from shlex import quote as shq
 from hashlib import md5
-from typing import Literal, overload, TYPE_CHECKING
+from typing import Literal, overload, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable, Iterator
 from telnetlib import Telnet
 from random import random
@@ -71,7 +71,10 @@ def chunked(blob: bytes, chunk_size: int) -> Iterator[bytes]:
         yield blob[i : i + chunk_size]
 
 
-def script(script) -> tuple[Literal["ash"], Literal["-c"], str]:
+T = TypeVar("T", bound=str)
+
+
+def script(script: T) -> tuple[Literal["ash"], Literal["-c"], T]:
     return ("ash", "-c", script)
 
 
